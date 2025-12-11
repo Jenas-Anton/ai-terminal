@@ -1,31 +1,33 @@
 import { google } from '@ai-sdk/google';
 import chalk from 'chalk';
+import { tr } from 'zod/v4/locales';
 
 /**
  * Available Google Generative AI tools configuration
  * Note: Tools are instantiated lazily to avoid initialization errors
  */
+
 export const availableTools = [
   {
     id: 'google_search',
     name: 'Google Search',
     description: 'Access the latest information using Google search. Useful for current events, news, and real-time information.',
     getTool: () => google.tools.googleSearch({}),
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'code_execution',
     name: 'Code Execution',
     description: 'Generate and execute Python code to perform calculations, solve problems, or provide accurate information.',
     getTool: () => google.tools.codeExecution({}),
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'url_context',
     name: 'URL Context',
     description: 'Provide specific URLs that you want the model to analyze directly from the prompt. Supports up to 20 URLs per request.',
     getTool: () => google.tools.urlContext({}),
-    enabled: false,
+    enabled: true,
   },
 ];
 
