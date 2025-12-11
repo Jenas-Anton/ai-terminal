@@ -190,7 +190,7 @@ async function chatLoop(conversation) {
 
   while (true) {
     const userInput = await text({
-      message: chalk.blue("💬 Your message"),
+      message: chalk.blueBright("💬 Your message"),
       placeholder: "Type your message...",
       validate(value) {
         if (!value || value.trim().length === 0) {
@@ -250,7 +250,7 @@ export async function startChat(mode = "chat", conversationId = null) {
     intro(
       boxen(chalk.bold.cyan("🚀 GenAI Chat"), {
         padding: 1,
-        borderStyle: "double",
+        borderStyle: "singleDouble",
         borderColor: "cyan",
       })
     );

@@ -40,7 +40,7 @@ const wakeUpAction = async () => {
     return;
   }
 
-  console.log(chalk.green(`\nWelcome back, ${user.name}!\n`));
+  console.log(chalk.green(`\nWelcome back, Jenas Anton!\n`));
 
   const choice = await select({
     message: "Select an option:",
@@ -58,7 +58,7 @@ const wakeUpAction = async () => {
       {
         value: "agent",
         label: "Agentic Mode",
-        hint: "Advanced AI agent (Coming soon)",
+        hint: "AI agent",
       },
     ],
   });

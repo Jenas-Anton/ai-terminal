@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import chalk from "chalk";
 import figlet from "figlet";
+import chalkAnimation from "chalk-animation";
 
 import { Command } from "commander";
 
@@ -13,16 +14,23 @@ import { wakeUp } from "./commands/ai/wakeUp.js";
 dotenv.config();
 
 async function main() {
-  // Display banner
-  console.log(
-    chalk.cyan(
-      figlet.textSync("GenAI CLI", {
-        font: "Standard",
-        horizontalLayout: "default",
-      })
-    )
-  );
-  console.log(chalk.gray("A Cli based AI tool \n"));
+  // Generate ASCII text
+  const ascii = figlet.textSync("Custom CLI", {
+    font: "Big",
+    horizontalLayout: "default",
+  });
+  
+  
+  const animation = chalkAnimation.neon(ascii);
+
+  // Wait for animation duration (milliseconds)
+  await new Promise((resolve) => setTimeout(resolve, 4000));
+
+  // Stop animation and keep the final colored frame
+  animation.stop();
+
+  // Small subtitle / tagline after the banner
+  console.log(chalk.gray("A CLI based AI tool \n"));
 
   const program = new Command("genai");
 
@@ -40,8 +48,6 @@ async function main() {
   program.action(() => {
     program.help();
   });
-
-
 
   program.parse();
 }

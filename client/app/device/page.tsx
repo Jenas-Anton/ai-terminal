@@ -1,9 +1,9 @@
 "use client"
-import { authClient } from "@/lib/auth-client"
-import type React from "react"
 
+import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import type { FormEvent, ChangeEvent } from "react"
 import { ShieldAlert } from "lucide-react"
 
 export default function DeviceAuthorizationPage() {
@@ -12,20 +12,25 @@ export default function DeviceAuthorizationPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setIsLoading(true)
 
     try {
-      const formattedCode = userCode.trim().replace(/-/g, "").toUpperCase()
+      const formattedCode = userCode.replace(/-/g, "").trim().toUpperCase()
 
+      // Adjust this call to match your authClient API shape.
+      // If authClient.device expects `query`, revert to your original call.
       const response = await authClient.device({
         query: { user_code: formattedCode },
+        // or: body: { user_code: formattedCode }
       })
 
-      if (response.data) {
+      if (response?.data) {
         router.push(`/approve?user_code=${formattedCode}`)
+      } else {
+        setError("Invalid or expired code")
       }
     } catch (err) {
       setError("Invalid or expired code")
@@ -34,13 +39,20 @@ export default function DeviceAuthorizationPage() {
     }
   }
 
-  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
-    if (value.length > 4) {
-      value = value.slice(0, 4) + "-" + value.slice(4, 8)
-    }
-    setUserCode(value)
+  const formatRaw = (raw: string) => {
+    // Keep only A-Z0-9, uppercase
+    const alnum = raw.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    // Insert hyphen after 4 chars if length > 4
+    if (alnum.length <= 4) return alnum
+    return `${alnum.slice(0, 4)}-${alnum.slice(4, 8)}`
   }
+
+  const handleCodeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const next = formatRaw(e.target.value)
+    setUserCode(next)
+  }
+
+  const isValidLength = userCode.replace(/-/g, "").length === 8
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -69,25 +81,33 @@ export default function DeviceAuthorizationPage() {
               </label>
               <input
                 id="code"
+                name="code"
+                inputMode="text"
+                autoCapitalize="characters"
+                autoComplete="off"
                 type="text"
                 value={userCode}
                 onChange={handleCodeChange}
                 placeholder="XXXX-XXXX"
-                maxLength={9}
+                maxLength={9} // 8 chars + 1 hyphen
                 className="w-full px-4 py-3 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-zinc-600 font-mono text-center text-lg tracking-widest"
+                aria-invalid={!!error}
+                aria-describedby={error ? "code-error" : undefined}
               />
               <p className="text-xs text-muted-foreground mt-2">Find this code on the device you want to authorize</p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="p-3 rounded-lg bg-red-950 border border-red-900 text-red-200 text-sm">{error}</div>
+              <div id="code-error" className="p-3 rounded-lg bg-red-950 border border-red-900 text-red-200 text-sm">
+                {error}
+              </div>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || userCode.length < 9}
+              disabled={isLoading || !isValidLength}
               className="w-full py-3 px-4 bg-zinc-100 text-zinc-950 font-semibold rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? "Verifying..." : "Continue"}
